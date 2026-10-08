@@ -181,7 +181,9 @@ def study_task(meta: dict, src: dict, tgt: dict, pr: dict, passages: list[dict],
         "2. Voice: register and diction (archaic, formal, plain, colloquial, dialect);",
         "   sentence architecture (long periodic sentences, parallelism, anaphora, refrains,",
         "   lists); rhythm and sound (rhymed prose, alliteration, cadence); fields of imagery;",
-        "   rhetorical devices; humour or irony; emotional temperature. Back every claim with",
+        "   rhetorical devices; humour or irony; emotional temperature; and nuance: how the",
+        "   author hedges, qualifies, holds two feelings at once or says less than he means.",
+        "   Back every claim with",
         "   a short quote from the source (at most 15 words) and its segment id.",
         "3. Motifs and key words: recurring words and images that must stay recognisable",
         f"   across the book, each with one proposed {tgt['name']} rendering.",
@@ -205,6 +207,8 @@ def study_task(meta: dict, src: dict, tgt: dict, pr: dict, passages: list[dict],
         "This text is copied into every translation task, so it must stand alone: the voice in",
         "3-5 bullets, then a short DO / DON'T list (repetition, sentence length, imagery,",
         "register, dialogue). No facts about the author unless they change a translation choice.",
+        "Include one line on nuance: which hedges, mixed judgements or ironies translators must",
+        "keep exactly as strong or as weak as they are in the source.",
         "Never tell translators to translate literally or to keep the source word order: they",
         "must keep the images and the rhythm, in natural " + tgt["name"] + " sentences.",
         "",
@@ -276,7 +280,9 @@ def people_for(text: str, people: list[tuple[list[str], str]], limit: int = 12) 
 
 
 EDIT_RULES = """1. Meaning is fixed. Never add, drop or change information, names, numbers or
-   negations. Every sentence of the source must still be in the translation.
+   negations. Every sentence of the source must still be in the translation. Keep the
+   exact degree: a hedge stays a hedge, a mixed judgement stays mixed, irony stays
+   irony. A more vivid word must not make a statement stronger or more one-sided.
 2. For each segment, read SOURCE, then DRAFT, and revise the draft toward the author's
    voice: restore images and metaphors the draft flattened or explained; restore
    repetitions, refrains and parallel structures it normalised; bring sentence length

@@ -649,6 +649,10 @@ def glossary_for(text: str, g: dict) -> list[tuple[str, str]]:
 RULES = """1. Translate EVERY segment completely and faithfully: every sentence, clause, list item,
    number, caveat and example. Never summarize, shorten, merge, split or reorder segments,
    and never add explanations that are not in the source.
+   Keep the exact degree: hedges ("perhaps", "not entirely", "rather"), qualifiers, mixed
+   or ambivalent judgements, understatement and irony stay as they are. Never make a
+   statement stronger, weaker, more certain or more one-sided than the source: "I respect
+   it but found it very hard" must not become "I disliked it".
 2. Keep VERBATIM: anything in `backticks`, URLs, e-mail addresses, file paths, code
    identifiers, command names, version numbers, and the "keep as-is" terms below.
 3. Keep the inline markup: **bold**, *italic*, `code`, [link text](url). Translate the

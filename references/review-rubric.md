@@ -12,14 +12,18 @@ reviewer's context small enough to read every pair. Sampling misses things.
 3. **MEANING**: wrong meaning, flipped negation, wrong technical claim, wrong
    number, version or unit, the wrong sense of a domain term (for example a
    build "artifact" rendered as an archaeological artefact).
-4. **ADDITION**: content not in the source. Small connective words are fine.
+4. **DEGREE**: a statement made stronger, weaker, more certain or more one-sided:
+   a hedge or qualifier dropped ("perhaps", "not entirely", "somewhat"), a mixed
+   judgement turned into a simple one, understatement or irony turned literal,
+   or the reverse. CRITICAL when it changes what the author thinks.
+5. **ADDITION**: content not in the source. Small connective words are fine.
    Explanations, "corrections" and modernisations are not, unless they are
    `NOTE:` lines and notes are enabled. Check every note for factual accuracy.
-5. **IDENTIFIERS**: code, commands, parameters, file names, paths or names
+6. **IDENTIFIERS**: code, commands, parameters, file names, paths or names
    altered or translated.
-6. **TERMS**: a glossary term rendered differently from the glossary, or one
+7. **TERMS**: a glossary term rendered differently from the glossary, or one
    term translated two ways.
-7. **STRUCTURE**: list items, table cells or headings that lost or changed
+8. **STRUCTURE**: list items, table cells or headings that lost or changed
    information.
 
 Do **not** report style, word choice or fluency unless it changes the meaning.
