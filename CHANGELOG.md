@@ -1,0 +1,20 @@
+# Changelog
+
+## 1.0.0 — 2026-10-08
+
+First release.
+
+- Extraction from PDF (text layer), EPUB, DOCX, HTML, Markdown and TXT into
+  chapters and blocks. Tables with and without borders, drawn bullets, code
+  boxes, page furniture and figure detection are handled.
+- Chunk plan, self-contained task files, and a plain-text `@@ id`
+  translation format.
+- Checks for missing or misplaced segments, lost code, URLs and keep-terms,
+  untranslated text, dropped sentences, missing numbers, length outliers and
+  the glossary.
+- A glossary with sense-limited terms and translator proposals.
+- Parallel translation with claimed chunks, `status`, and side-by-side review
+  sheets.
+- `init --force` carries finished translations over to a re-extracted book.
+- Output to PDF (through Chromium, with a TOC with page numbers and bookmarks),
+  EPUB 3, DOCX (RTL- and CJK-aware), HTML and Markdown.
