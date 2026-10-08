@@ -302,6 +302,14 @@ def test_voice_study_brief_people_and_edit(md_project):
     assert "voice-edited chunks: 1 of 1" in run("status", "-p", proj).stdout
 
 
+def test_arabic_lint_and_grammar_notes():
+    import langs
+    assert langs.lint("ar", "«قالت هي إنها سترقص»")
+    assert langs.lint("ar", "«اقترب، يا العندليب»")
+    assert not langs.lint("ar", "«قالت إنها سترقص»، قال العندليب. «يا الله!»")
+    assert "verbal sentence" in book.lang_notes("ar") and book.lang_notes("xx") == ""
+
+
 def test_voice_profile_and_people():
     import voice
     segs = [{"id": f"c001.b{i:04d}", "kind": "para",

@@ -664,7 +664,8 @@ RULES = """1. Translate EVERY segment completely and faithfully: every sentence,
    a warning. If you meet a recurring technical term that is not in the glossary,
    propose one under "@@ glossary".
 5. Translate meaning, not word order: the result must read naturally in {tgt}, in the
-   register described under "Style". Proper names: keep or transliterate consistently.
+   register described under "Style". Follow {tgt} grammar, not the source's: word
+   order, agreement, and pronouns only where {tgt} needs them. Proper names: keep or transliterate consistently.
 6. Never correct facts, claims or examples - translate them as written, even if wrong.
    Obvious typos and stray spaces in the source may simply be normalised.{notes_rule}
 7. Code blocks are shown only as context; they are copied into the book unchanged.
@@ -692,6 +693,12 @@ When the file is written, run:
     python "{script}" check {n} --project "{project}"
 and fix every ERROR it reports (WARNINGS: re-read the segment and fix it if it is right).
 """
+
+
+def lang_notes(code: str) -> str:
+    """Short grammar notes for translating into this language, if there are any."""
+    f = SCRIPTS_DIR.parent / "references" / "lang" / f"{langs.norm(code)}.md"
+    return f.read_text(encoding="utf-8").strip() if f.exists() else ""
 
 
 def build_task(p: Project, n: int) -> str:
@@ -741,6 +748,9 @@ def build_task(p: Project, n: int) -> str:
         p.cfg.get("style") or f"Clear, natural, standard {tgt['name']} suitable for a published book.",
         "",
     ]
+    notes = lang_notes(tgt["code"])
+    if notes:
+        head += [f"## Writing good {tgt['name']}", notes, ""]
     if brief:
         head += ["## Voice (the author's style: keep it)", brief, ""]
         people = voice.people_for(text_all, voice.parse_people(p.voice_text("people.md")))
@@ -960,6 +970,9 @@ def check_chunk(p: Project, n: int, segs: dict, baseline: float, chunk_of: dict)
                 warns.append(f"{i}: much shorter than usual ({r:.2f} vs median {baseline:.2f}) - omission?")
             elif r > baseline * 2.2:
                 warns.append(f"{i}: much longer than usual ({r:.2f} vs median {baseline:.2f}) - addition?")
+        # target-language patterns that are almost always translationese
+        for msg in langs.lint(tgt["code"], t):
+            warns.append(f"{i}: {msg}")
         # voice edit: compare with the pre-edit draft
         if i in draft:
             for msg in voice.drift(s, draft[i], t, numbers):
@@ -1194,7 +1207,8 @@ def cmd_edit(a):
                                voice.people_for(text_all, people_all),
                                glossary_for(text_all, p.glossary), items,
                                p.tfile(n), df, SCRIPTS_DIR / "book.py", p.root,
-                               quotes=voice.quotes_for(ids, quotes_all))
+                               quotes=voice.quotes_for(ids, quotes_all),
+                               grammar=lang_notes(p.tgt["code"]))
         f = p.editfile(n)
         f.parent.mkdir(parents=True, exist_ok=True)
         f.write_text(text, encoding="utf-8")

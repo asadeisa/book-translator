@@ -1,0 +1,11 @@
+Write Arabic syntax, not English syntax in Arabic words:
+- Narration uses the verbal sentence: verb first. «عبست الفتاة» / «فهم العندليب سرّ حزنه», not «الفتاة عبست». Use the nominal sentence or «أمّا ... فـ» only for a real topic or contrast.
+- A verb before its subject stays singular and agrees in gender: «قال الطلاب»، «صاحت الشجرة».
+- No independent pronoun that the verb already carries: «قالت إنها سترقص», never «قالت هي إنها». Keep «أنا/هو/هي» only for real contrast («أنا لا أخاف»). English emphasis (italics, capitals) becomes word order, «إنّ» or «لقد», not an extra pronoun.
+- Do not copy English inversion. "Bitter, bitter was the pain" → «كان الألم مرًّا مرًّا» or «ما أمرَّ الألم!»; "Crimson was the girdle" → «وكان نطاقُ البتلات قرمزيًّا». Fronting a predicate is Arabic too, but only with correct agreement and when it sounds natural.
+- Agreement: non-human plurals take feminine singular («أجنحته البنية تخفق»); the dual agrees («شفتاه حلوتان»); an adjective agrees in gender and definiteness («العندليب الصغير»).
+- Vocative: «يا عندليبُ»، «أيها العندليب الصغير»، «يا أيها العندليب». Never «يا العندليب» or «يا عندليب الصغير».
+- An indefinite noun takes a relative clause without «الذي/التي»: «وردةٌ تفتّحت».
+- Dummy "it" and "there is" are not translated word for word: "It is pleasant to sit" → «ما أطيبَ أن يجلس المرء» or «يطيب للمرء أن يجلس».
+- Join clauses with «و/ف/ثم» rather than chains of commas; a narrative sentence often opens with «و» or «ف».
+- English fillers are not Arabic: "in fact" → «بل» more often than «في الواقع»; "upon my word" → «والله» or «حقًّا»; "I am afraid that" (a hedge) → «أخشى أن» / «يؤسفني أن».

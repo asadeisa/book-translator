@@ -163,6 +163,27 @@ RTL_RE = script_re(RTL_SCRIPTS)
 LATIN_RE = script_re(["latin"])
 
 
+# Mechanical warnings for patterns that are almost always translationese in the
+# target language. Notes for translators live in references/lang/<code>.md.
+LINT = {
+    "ar": [
+        (r"(?<!\w)(?:قال|قالت|صاح|صاحت|أجاب|أجابت|همس|همست|سأل|سألت|تمتم|تمتمت)\s+(?:هو|هي)(?!\w)",
+         "independent pronoun after the verb (\"قالت هي\"): the verb already carries it"),
+        (r"(?<!\w)يا\s+ال(?!له(?!\w))", "vocative \"يا\" before \"ال\": use \"يا أيها\" / \"أيها\""),
+        (r"(?<!\w)يا\s+[^\s\W\d_]+\s+ال[^\s\W\d_]+",
+         "vocative + definite adjective (\"يا عندليب الصغير\")? fine for an idafa (\"يا رفاق الصبا\")"),
+    ],
+}
+
+
+def lint(code: str, text: str) -> list[str]:
+    out = []
+    for pat, msg in LINT.get(norm(code), []):
+        for m in re.finditer(pat, text):
+            out.append(f"{msg}: \"{m.group(0).strip()}\"")
+    return out
+
+
 def ascii_digits(text: str) -> str:
     return text.translate(_TO_ASCII)
 

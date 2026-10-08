@@ -210,6 +210,8 @@ def study_task(meta: dict, src: dict, tgt: dict, pr: dict, passages: list[dict],
         "This text is copied into every translation task, so it must stand alone: the voice in",
         "3-5 bullets, then a short DO / DON'T list (repetition, sentence length, imagery,",
         "register, dialogue). No facts about the author unless they change a translation choice.",
+        "Every " + tgt["name"] + " example you write (model passages, names, forms of address) must",
+        "be grammatical " + tgt["name"] + ": each one is copied into every task.",
         "Include one line on nuance: which hedges, mixed judgements or ironies translators must",
         "keep exactly as strong or as weak as they are in the source.",
         "Never tell translators to translate literally or to keep the source word order: they",
@@ -303,7 +305,7 @@ EDIT_RULES = """1. Meaning is fixed. Never add, drop or change information, name
 
 def edit_task(n: int, total: int, meta: dict, src: dict, tgt: dict, study: str, brief: str,
               people: list[str], gloss: list[tuple[str, str]], items: list[tuple[str, str, str, str]],
-              out_path, draft_path, script, project, quotes: list[str] = ()) -> str:
+              out_path, draft_path, script, project, quotes: list[str] = (), grammar: str = "") -> str:
     head = [
         f"# book-translator: voice edit, chunk {n:04d} of {total:04d}",
         f"Book: {meta.get('title', '')}" + (f" by {meta['author']}" if meta.get("author") else ""),
@@ -318,6 +320,8 @@ def edit_task(n: int, total: int, meta: dict, src: dict, tgt: dict, study: str, 
         "## Voice brief",
         brief.strip() or "(no brief)",
     ]
+    if grammar:
+        head += ["", f"## Writing good {tgt['name']} (check every segment against this)", grammar]
     if study.strip():
         head += ["", "## Voice study (reference)", study.strip()]
     if people:
