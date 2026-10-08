@@ -9,3 +9,5 @@ Write Arabic syntax, not English syntax in Arabic words:
 - Dummy "it" and "there is" are not translated word for word: "It is pleasant to sit" → «ما أطيبَ أن يجلس المرء» or «يطيب للمرء أن يجلس».
 - Join clauses with «و/ف/ثم» rather than chains of commas; a narrative sentence often opens with «و» or «ف».
 - English fillers are not Arabic: "in fact" → «بل» more often than «في الواقع»; "upon my word" → «والله» or «حقًّا»; "I am afraid that" (a hedge) → «أخشى أن» / «يؤسفني أن».
+- English "would/could" for something hypothetical is not a future: "She would not sacrifice herself" → «ما كانت لتضحّي بنفسها» / «لم تكن لتضحّي», not «لن تضحّي».
+- Do not coin words to mirror English («يقرمز»، «لهبيّة اللون»): use a phrase that exists («يجعله قرمزيًّا»، «بلون اللهب»).
