@@ -742,6 +742,10 @@ def build_task(p: Project, n: int) -> str:
         people = voice.people_for(text_all, voice.parse_people(p.voice_text("people.md")))
         if people:
             head += ["## People in this chunk"] + [f"- {x}" for x in people] + [""]
+        quotes = voice.quotes_for(ids, voice.parse_quotes(p.voice_text("quotes.md")))
+        if quotes:
+            head += ["## Quotable lines in this chunk", voice.QUOTE_NOTE.format(tgt=tgt["name"])]
+            head += [f"- {q}" for q in quotes] + [""]
     head += [
         "## Glossary for this chunk (mandatory renderings)",
     ]
@@ -1122,9 +1126,9 @@ def cmd_voice(a):
         task.write_text(text, encoding="utf-8")
         print(f"voice study task: {task}  (~{langs.estimate_tokens(text)} tokens)")
         print("Give it to ONE agent (references/voice.md). It writes voice/study.md, "
-              "voice/brief.md and voice/people.md.")
+              "voice/brief.md, voice/people.md and voice/quotes.md.")
         return
-    for name in ("study.md", "brief.md", "people.md"):
+    for name in ("study.md", "brief.md", "people.md", "quotes.md"):
         f = p.voice_dir / name
         print(f"  {'ok' if f.exists() else 'missing':8s} voice/{name}"
               + (f"  ({langs.word_count(f.read_text(encoding='utf-8'))} words)" if f.exists() else ""))
@@ -1165,6 +1169,7 @@ def cmd_edit(a):
     study = p.voice_text("study.md")
     brief = p.voice_text("brief.md")
     people_all = voice.parse_people(p.voice_text("people.md"))
+    quotes_all = voice.parse_quotes(p.voice_text("quotes.md"))
     for n in nums:
         c = next((c for c in plan["chunks"] if c["n"] == n), None)
         if c is None or not ready(c):
@@ -1184,7 +1189,8 @@ def cmd_edit(a):
         text = voice.edit_task(n, len(plan["chunks"]), p.book["meta"], p.src, p.tgt, study, brief,
                                voice.people_for(text_all, people_all),
                                glossary_for(text_all, p.glossary), items,
-                               p.tfile(n), df, SCRIPTS_DIR / "book.py", p.root)
+                               p.tfile(n), df, SCRIPTS_DIR / "book.py", p.root,
+                               quotes=voice.quotes_for(ids, quotes_all))
         f = p.editfile(n)
         f.parent.mkdir(parents=True, exist_ok=True)
         f.write_text(text, encoding="utf-8")

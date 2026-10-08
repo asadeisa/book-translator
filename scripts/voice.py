@@ -197,6 +197,9 @@ def study_task(meta: dict, src: dict, tgt: dict, pr: dict, passages: list[dict],
         "   references and words with no equivalent.",
         f"7. Model passages: translate 3 of the passages below into {tgt['name']} as examples",
         "   of the voice, each labelled with its segment id.",
+        "8. Quotable lines: the sentences readers are most likely to underline, quote or share",
+        "   (aphorisms, definitions, chiasmus, a paragraph's closing line, the book's famous",
+        "   lines). Use your research: which lines of this book are quoted most?",
         "",
         f"## Step 4: write {voice_dir / 'brief.md'} (at most 300 words)",
         "This text is copied into every translation task, so it must stand alone: the voice in",
@@ -208,6 +211,11 @@ def study_task(meta: dict, src: dict, tgt: dict, pr: dict, passages: list[dict],
         f"## Step 5: write {voice_dir / 'people.md'}",
         "One line per person, starting with the name as written in the source:",
         "- <name in source> (<name in target>): <gender>; <role>; <how they speak>; <form of address>",
+        "",
+        f"## Step 5b: write {voice_dir / 'quotes.md'}",
+        "The quotable lines from section 8, one per line, at most 40 for the whole book:",
+        "- <segment-id>: <the quotable sentence, copied exactly from the source>",
+        "Read more of the book with `show` to find them; do not list whole paragraphs.",
         "",
         "## Step 6: glossary",
         "For each motif from section 3, run:",
@@ -239,6 +247,26 @@ def parse_people(text: str) -> list[tuple[list[str], str]]:
     return out
 
 
+QUOTE_NOTE = """Readers copy these lines into quote collections and share them on their own,
+so each must stand alone in {tgt}: faithful, compact, rhythmical and memorable, as quotable
+as the source. Inside these lines only, a glossary rendering may give way to the word that
+makes the line work (keep its meaning). Keep the rest of the segment as usual."""
+
+
+def parse_quotes(text: str) -> dict[str, list[str]]:
+    """Lines '- c004.b0010: sentence' -> {segment id: [sentences]}."""
+    out: dict[str, list[str]] = {}
+    for line in text.splitlines():
+        m = re.match(r"\s*[-*]\s*`?([\w.]+?)`?\s*:\s*(.+)", line)
+        if m and re.match(r"(c\d+|meta)\.", m.group(1)):
+            out.setdefault(m.group(1), []).append(m.group(2).strip())
+    return out
+
+
+def quotes_for(ids, quotes: dict[str, list[str]]) -> list[str]:
+    return [f"{i}: {q}" for i in ids for q in quotes.get(i, [])]
+
+
 def people_for(text: str, people: list[tuple[list[str], str]], limit: int = 12) -> list[str]:
     hits = []
     for words, line in people:
@@ -266,7 +294,7 @@ EDIT_RULES = """1. Meaning is fixed. Never add, drop or change information, name
 
 def edit_task(n: int, total: int, meta: dict, src: dict, tgt: dict, study: str, brief: str,
               people: list[str], gloss: list[tuple[str, str]], items: list[tuple[str, str, str, str]],
-              out_path, draft_path, script, project) -> str:
+              out_path, draft_path, script, project, quotes: list[str] = ()) -> str:
     head = [
         f"# book-translator: voice edit, chunk {n:04d} of {total:04d}",
         f"Book: {meta.get('title', '')}" + (f" by {meta['author']}" if meta.get("author") else ""),
@@ -287,6 +315,11 @@ def edit_task(n: int, total: int, meta: dict, src: dict, tgt: dict, study: str, 
         head += ["", "## People in this chunk"] + [f"- {x}" for x in people]
     if gloss:
         head += ["", "## Glossary (keep these renderings)"] + [f"{k} => {v}" for k, v in gloss]
+    if quotes:
+        head += ["", "## Quotable lines in this chunk", QUOTE_NOTE.format(tgt=tgt["name"]),
+                 "Read each one's translation on its own: would a reader copy it into a quote",
+                 "collection? If not, make it so, without changing its meaning."]
+        head += [f"- {q}" for q in quotes]
     head += [
         "",
         "## Output",

@@ -277,6 +277,11 @@ def test_voice_study_brief_people_and_edit(md_project):
     task = (proj / "work" / "0001.task.txt").read_text(encoding="utf-8")
     assert "10. Keep the author's voice" in task and "Warm, practical" in task
     assert "## People in this chunk" not in task      # neither name occurs in the text
+    (proj / "voice" / "quotes.md").write_text("- c002.b0000: Water early in the morning.\n"
+                                              "- c009.b0001: not in this book", encoding="utf-8")
+    run("task", "1", "-p", proj)
+    task = (proj / "work" / "0001.task.txt").read_text(encoding="utf-8")
+    assert "## Quotable lines in this chunk" in task and "- c002.b0000: Water early" in task
 
     # edit needs a checked chunk; it keeps the draft and check compares against it
     (proj / "translations" / "0001.txt").write_text(TRANSLATION_FR, encoding="utf-8")
@@ -286,6 +291,7 @@ def test_voice_study_brief_people_and_edit(md_project):
     edit = (proj / "work" / "0001.edit.txt").read_text(encoding="utf-8")
     assert (proj / "translations" / "_draft" / "0001.txt").exists()
     assert "SOURCE: Water early in the morning." in edit and "DRAFT: Arrosez tôt le matin." in edit
+    assert "## Quotable lines in this chunk" in edit
 
     import time
     time.sleep(1.1)

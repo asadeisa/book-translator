@@ -11,7 +11,7 @@ Voice mode adds three things:
 
 | Step | Who | Writes |
 |---|---|---|
-| 1. `BT voice study` | ONE agent, ideally with web search | `voice/study.md`, `voice/brief.md`, `voice/people.md`, motif glossary entries |
+| 1. `BT voice study` | ONE agent, ideally with web search | `voice/study.md`, `voice/brief.md`, `voice/people.md`, `voice/quotes.md`, motif glossary entries |
 | 2. `BT task next` | translators, as usual | every task now carries the brief, rule 10 and the people in that chunk |
 | 3. `BT edit next` | an editor per chunk | revises the checked draft toward the voice; the draft is kept in `translations/_draft/` |
 
@@ -50,7 +50,12 @@ Nothing changes in the dispatch (`references/translator-prompt.md`). While
   every image as an image, and one register throughout;
 - a "Voice" section (the brief);
 - "People in this chunk": the `voice/people.md` lines whose names occur in
-  the chunk (gender, how they speak, formal or informal address).
+  the chunk (gender, how they speak, formal or informal address);
+- "Quotable lines in this chunk": the `voice/quotes.md` lines of its segments.
+  Readers quote these on their own, so they must be as memorable in the
+  translation as in the source. In a test on Gibran, a glossary term
+  ("tender affinity") made the book's most quoted line clumsy, so inside these
+  lines a glossary rendering may give way to the word that makes the line work.
 
 ## 3. Edit (per chunk, after `check` passes)
 
