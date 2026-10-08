@@ -90,6 +90,20 @@ accepted renderings, or a brand-name convention. Translators propose new terms
 as they go (`@@ glossary`); `BT status` shows pending proposals, and
 `BT glossary` lists them. Accept or correct them between batches.
 
+### 4b. Literary books: study the voice (optional)
+
+For novels, poetry, essays and memoirs, keep the author's style as well as the
+meaning. Before chunk 1:
+```
+BT voice study          # writes work/voice-study.task.txt for ONE agent (web search helps)
+```
+That agent researches the author and the book and writes `voice/study.md`,
+`voice/brief.md` (copied into every task) and `voice/people.md`. Read and fix
+the brief before translating. After each chunk passes `check`,
+`BT edit next` writes a voice-edit task that revises the draft toward the
+author's voice; `check` then also warns if the edit lost content. Full steps:
+`references/voice.md`.
+
 ### 5. Translate, chunk by chunk
 
 Each chunk is about 2,500 source tokens. A task file contains everything the
@@ -198,6 +212,8 @@ my-book-ar/
   glossary.json       terms, keep-list, pending proposals
   work/NNNN.task.txt  task files (regenerate any time with `task N`)
   translations/NNNN.txt   the translation, one file per chunk  <- the real work
+  translations/_draft/    voice mode: each chunk as it was before the voice edit
+  voice/              voice mode: study.md, brief.md, people.md
   review/             review sheets and findings
   output/             book files, assets, preview/
 ```
@@ -221,4 +237,5 @@ my-book-ar/
 
 More detail: `references/extraction.md` (inputs and fixing extraction),
 `references/output.md` (formats, fonts, RTL and CJK),
-`references/translator-prompt.md`, `references/review-rubric.md`.
+`references/translator-prompt.md`, `references/review-rubric.md`,
+`references/voice.md` (literary books).

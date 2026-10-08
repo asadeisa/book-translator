@@ -258,6 +258,59 @@ def test_glossary_sense_and_code_are_ignored():
 
 
 # ---------------------------------------------------------------------------
+# voice mode
+# ---------------------------------------------------------------------------
+
+def test_voice_study_brief_people_and_edit(md_project):
+    _, proj = md_project
+    out = run("voice", "study", "-p", proj).stdout
+    study = (proj / "work" / "voice-study.task.txt").read_text(encoding="utf-8")
+    assert "voice-study.task.txt" in out and "## Style profile" in study and "@@ -- c001.b0000" in study
+    assert "Voice" not in (run("task", "1", "-p", proj) and
+                           (proj / "work" / "0001.task.txt").read_text(encoding="utf-8"))
+
+    # an agent wrote the brief and people: every task now carries them
+    (proj / "voice" / "brief.md").write_text("- Warm, practical, second person.", encoding="utf-8")
+    (proj / "voice" / "people.md").write_text("- Jane (Jeanne): woman; the gardener; plain speech\n"
+                                              "- Bob: man; not in this book", encoding="utf-8")
+    run("task", "1", "-p", proj)
+    task = (proj / "work" / "0001.task.txt").read_text(encoding="utf-8")
+    assert "10. Keep the author's voice" in task and "Warm, practical" in task
+    assert "## People in this chunk" not in task      # neither name occurs in the text
+
+    # edit needs a checked chunk; it keeps the draft and check compares against it
+    (proj / "translations" / "0001.txt").write_text(TRANSLATION_FR, encoding="utf-8")
+    assert "check 1" in run("edit", "1", "-p", proj).stdout
+    run("check", "1", "-p", proj)
+    out = run("edit", "next", "-p", proj).stdout
+    edit = (proj / "work" / "0001.edit.txt").read_text(encoding="utf-8")
+    assert (proj / "translations" / "_draft" / "0001.txt").exists()
+    assert "SOURCE: Water early in the morning." in edit and "DRAFT: Arrosez tôt le matin." in edit
+
+    import time
+    time.sleep(1.1)
+    cut = TRANSLATION_FR.replace("Il vous faudra de la *patience* et environ 6 heures de soleil. ", "")
+    (proj / "translations" / "0001.txt").write_text(cut, encoding="utf-8")
+    r = run("check", "1", "-p", proj, check=False)
+    assert "shorter than the draft" in r.stdout and "numbers in the draft but not in the edit: 6" in r.stdout
+    assert "voice-edited chunks: 1 of 1" in run("status", "-p", proj).stdout
+
+
+def test_voice_profile_and_people():
+    import voice
+    segs = [{"id": f"c001.b{i:04d}", "kind": "para",
+             "text": "You people remember youth with joy. You people call it golden. "
+                     "But I remember it as a prisoner remembers his chains, and the rain, and the wind."}
+            for i in range(6)]
+    pr = voice.profile(segs)
+    assert pr["paragraphs"] == 6 and ("You people", 12) in pr["openers"]
+    assert len(voice.pick_passages(segs, 3)) == 3
+    people = voice.parse_people("- سلمى كرامة (Selma Karamy): woman; quiet\n- Farris Effandi: old man\nnot a line")
+    assert len(people) == 2
+    assert voice.people_for("ونظرت سلمى إلى أبيها", people) == ["سلمى كرامة (Selma Karamy): woman; quiet"]
+
+
+# ---------------------------------------------------------------------------
 # re-extraction keeps finished work
 # ---------------------------------------------------------------------------
 

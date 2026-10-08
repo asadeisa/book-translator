@@ -93,6 +93,7 @@ follows [SKILL.md](SKILL.md).
 | `terms` / `glossary --add "term=translation"` | Find and fix the vocabulary |
 | `task next [--count 4]` | Write the next task file(s), one per translator |
 | `check N` / `check all` | Verify translations against the source |
+| `voice study` / `edit next` | Literary books: study the author's voice, then voice-edit checked chunks |
 | `status` | Progress and what to do next |
 | `review all` | Side-by-side review sheets |
 | `build [--formats pdf,epub,docx,html,md]` | Assemble the translated book |
@@ -118,6 +119,16 @@ These rules come from auditing a real AI translation of a 184-page technical
 book. The translation itself was about 99% faithful. The errors were in what the
 translator *added*: invented captions, wrong "modernisation" notes, and domain
 terms taken in their everyday sense.
+
+## Voice mode (literary books, experimental)
+
+For novels, poetry and essays the meaning is not enough: the author's voice
+has to survive too. `voice study` writes a task for one agent that researches
+the author and the book and writes a style study, a short brief and a list of
+characters. Every translation task then carries the brief. After a chunk
+passes `check`, `edit` writes a task that revises the draft toward the
+author's voice, and `check` warns if the edit lost content. See
+[references/voice.md](references/voice.md).
 
 ## Languages and formats
 

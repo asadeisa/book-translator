@@ -5,6 +5,8 @@
     python book.py terms                             # glossary candidates
     python book.py task next                         # write the next task file
     python book.py check 7                           # verify chunk 7
+    python book.py voice study                       # literary books: study the author's voice
+    python book.py edit next                         # literary books: voice edit of a chunk
     python book.py status                            # progress, what is next
     python book.py build --formats pdf,epub,docx     # assemble the translated book
 
@@ -26,6 +28,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import langs  # noqa: E402
+import voice  # noqa: E402
 from uris import WEB_LINK  # noqa: E402
 
 SCRIPTS_DIR = Path(__file__).resolve().parent
@@ -97,6 +100,24 @@ class Project:
 
     def taskfile(self, n: int) -> Path:
         return self.root / "work" / f"{n:04d}.task.txt"
+
+    def draftfile(self, n: int) -> Path:
+        return self.root / "translations" / "_draft" / f"{n:04d}.txt"
+
+    def editfile(self, n: int) -> Path:
+        return self.root / "work" / f"{n:04d}.edit.txt"
+
+    @property
+    def voice_dir(self) -> Path:
+        return self.root / "voice"
+
+    def voice_text(self, name: str) -> str:
+        f = self.voice_dir / name
+        return f.read_text(encoding="utf-8") if f.exists() else ""
+
+    def edited(self, n: int) -> bool:
+        d, f = self.draftfile(n), self.tfile(n)
+        return d.exists() and f.exists() and f.stat().st_mtime > d.stat().st_mtime + 0.5
 
     @property
     def src(self) -> dict:
@@ -706,10 +727,22 @@ def build_task(p: Project, n: int) -> str:
         "## Rules",
         RULES.format(tgt=tgt["name"], notes_rule=notes_rule).rstrip(),
         f"9. {numerals}",
+    ]
+    brief = p.voice_text("brief.md").strip()
+    if brief:
+        head.append(voice.VOICE_RULE.format(tgt=tgt["name"]))
+    head += [
         "",
         "## Style",
         p.cfg.get("style") or f"Clear, natural, standard {tgt['name']} suitable for a published book.",
         "",
+    ]
+    if brief:
+        head += ["## Voice (the author's style: keep it)", brief, ""]
+        people = voice.people_for(text_all, voice.parse_people(p.voice_text("people.md")))
+        if people:
+            head += ["## People in this chunk"] + [f"- {x}" for x in people] + [""]
+    head += [
         "## Glossary for this chunk (mandatory renderings)",
     ]
     head += [f"{k} => {v}" for k, v in gl] or ["(none yet)"]
@@ -852,6 +885,9 @@ def check_chunk(p: Project, n: int, segs: dict, baseline: float, chunk_of: dict)
     g = p.glossary
     tgt = p.tgt
     tre = langs.script_re([s for s in tgt["scripts"] if s != "latin"]) if tgt["scripts"] else None
+    df = p.draftfile(n)
+    draft = (parse_translation(df.read_text(encoding="utf-8"))["segs"]
+             if df.exists() and f.stat().st_mtime > df.stat().st_mtime + 0.5 else {})
 
     for d in tr["dupes"]:
         errors.append(f"{d}: appears more than once")
@@ -916,6 +952,10 @@ def check_chunk(p: Project, n: int, segs: dict, baseline: float, chunk_of: dict)
                 warns.append(f"{i}: much shorter than usual ({r:.2f} vs median {baseline:.2f}) - omission?")
             elif r > baseline * 2.2:
                 warns.append(f"{i}: much longer than usual ({r:.2f} vs median {baseline:.2f}) - addition?")
+        # voice edit: compare with the pre-edit draft
+        if i in draft:
+            for msg in voice.drift(s, draft[i], t, numbers):
+                warns.append(f"{i}: {msg}")
         # glossary
         for k, v in glossary_for(s, g):
             if v.lower() not in t.lower():
@@ -1021,6 +1061,12 @@ def cmd_status(a):
         print(f"next: {rng(pending)}")
     print(f"glossary: {len(g['terms'])} terms, {len(g['pending'])} pending proposals"
           + (" -> review with `glossary`" if g["pending"] else ""))
+    if p.voice_text("brief.md"):
+        edited = sum(1 for c in plan["chunks"] if p.edited(c["n"]))
+        print(f"voice: brief in use | voice-edited chunks: {edited} of {total}"
+              + (" -> `edit next`" if done and edited < done else ""))
+    elif (p.root / "work" / "voice-study.task.txt").exists():
+        print("voice: study task written, voice/brief.md not yet (literary mode)")
     if ok == total and total:
         print("all chunks verified -> run the review pass, then `build`")
 
@@ -1057,6 +1103,96 @@ def cmd_review(a):
         print(o)
 
 
+# ---------------------------------------------------------------------------
+# voice mode (literary books)
+# ---------------------------------------------------------------------------
+
+def cmd_voice(a):
+    p = Project(a.project_dir)
+    task = p.root / "work" / "voice-study.task.txt"
+    if a.action == "study":
+        segs = [s for s in segments(p.book, p.excluded())]
+        pr = voice.profile(segs)
+        passages = voice.pick_passages(segs, a.passages)
+        chapters = [(ch["id"], ch["title"]) for ch in p.book["chapters"] if ch["id"] not in p.excluded()]
+        p.voice_dir.mkdir(parents=True, exist_ok=True)
+        text = voice.study_task(p.book["meta"], p.src, p.tgt, pr, passages, chapters,
+                                p.voice_dir, SCRIPTS_DIR / "book.py", p.root)
+        task.parent.mkdir(parents=True, exist_ok=True)
+        task.write_text(text, encoding="utf-8")
+        print(f"voice study task: {task}  (~{langs.estimate_tokens(text)} tokens)")
+        print("Give it to ONE agent (references/voice.md). It writes voice/study.md, "
+              "voice/brief.md and voice/people.md.")
+        return
+    for name in ("study.md", "brief.md", "people.md"):
+        f = p.voice_dir / name
+        print(f"  {'ok' if f.exists() else 'missing':8s} voice/{name}"
+              + (f"  ({langs.word_count(f.read_text(encoding='utf-8'))} words)" if f.exists() else ""))
+    if not task.exists():
+        print("run `voice study` to write the study task")
+    elif p.voice_text("brief.md"):
+        print("translation tasks now include the voice brief and the people of each chunk")
+
+
+def cmd_edit(a):
+    p = Project(a.project_dir)
+    plan, st = p.plan, p.state
+    if not p.voice_text("brief.md"):
+        raise SystemExit("no voice/brief.md yet: run `voice study` and let an agent write it first")
+    st.setdefault("edit_claimed", {})
+    segs = {s["id"]: s for s in segments(p.book)}
+
+    def ready(c):
+        f = p.tfile(c["n"])
+        chk = st["checked"].get(f"{c['n']:04d}")
+        return (f.exists() and chk and not chk["errors"]
+                and chk.get("mtime", 0) >= f.stat().st_mtime - 0.5)
+    if a.which == "next":
+        nums = []
+        for c in plan["chunks"]:
+            key = f"{c['n']:04d}"
+            if p.edited(c["n"]) or not ready(c) or (key in st["edit_claimed"] and not a.reclaim):
+                continue
+            nums.append(c["n"])
+            if len(nums) >= a.count:
+                break
+        if not nums:
+            print("no checked chunk waiting for a voice edit (translate and `check` first, "
+                  "or --reclaim)")
+            return
+    else:
+        nums = [int(x) for x in a.which.split(",")]
+    study = p.voice_text("study.md")
+    brief = p.voice_text("brief.md")
+    people_all = voice.parse_people(p.voice_text("people.md"))
+    for n in nums:
+        c = next((c for c in plan["chunks"] if c["n"] == n), None)
+        if c is None or not ready(c):
+            print(f"chunk {n:04d}: translate it and pass `check {n}` before the voice edit")
+            continue
+        df = p.draftfile(n)
+        if not df.exists():
+            df.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(p.tfile(n), df)
+        tr = parse_translation(df.read_text(encoding="utf-8"))
+        ids = [i for i in c["ids"] if i in segs and segs[i]["ch"] not in p.excluded()]
+        items = []
+        for i in ids:
+            d = "=" if i in tr["keep"] else tr["segs"].get(i, "(MISSING)")
+            items.append((i, segs[i]["kind"], segs[i]["text"], d))
+        text_all = " ".join(segs[i]["text"] for i in ids)
+        text = voice.edit_task(n, len(plan["chunks"]), p.book["meta"], p.src, p.tgt, study, brief,
+                               voice.people_for(text_all, people_all),
+                               glossary_for(text_all, p.glossary), items,
+                               p.tfile(n), df, SCRIPTS_DIR / "book.py", p.root)
+        f = p.editfile(n)
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(text, encoding="utf-8")
+        st["edit_claimed"][f"{n:04d}"] = time.strftime("%Y-%m-%d %H:%M")
+        print(f"edit {n:04d}: {f}  ->  overwrite {p.tfile(n)}  (~{langs.estimate_tokens(text)} tokens)")
+    p.save("state.json", st)
+
+
 def cmd_show(a):
     """Print a chapter's extracted blocks compactly, to compare with the original."""
     p = Project(a.project_dir)
@@ -1081,11 +1217,11 @@ def cmd_show(a):
         elif t == "figure":
             body = f"{b['file']}" + (f"  labels: {', '.join(b['labels'][:6])[:80]}" if b.get("labels") else "")
         else:
-            body = b["text"][:160]
+            body = b["text"] if a.full else b["text"][:160]
         lvl = f"h{b['level']}" if t == "heading" else t
         print(f"[{i:4d}] {lvl:7s} {body}")
         if bid in tr and tr[bid]:
-            print(f"        -> {tr[bid][:160]}")
+            print(f"        -> {tr[bid] if a.full else tr[bid][:160]}")
 
 
 def cmd_doctor(a):
@@ -1234,10 +1370,23 @@ def main(argv=None):
     s.add_argument("which")
     s.set_defaults(fn=cmd_review)
 
+    s = sub.add_parser("voice", help="literary books: `voice study` writes the voice-study task; "
+                                     "`voice` shows the voice files")
+    s.add_argument("action", nargs="?", default="status", choices=["status", "study"])
+    s.add_argument("--passages", type=int, default=8, help="sample passages in the study task")
+    s.set_defaults(fn=cmd_voice)
+
+    s = sub.add_parser("edit", help="literary books: voice-edit task(s): `edit next`, `edit 3`")
+    s.add_argument("which", nargs="?", default="next")
+    s.add_argument("--count", type=int, default=1)
+    s.add_argument("--reclaim", action="store_true", help="hand out claimed edits again")
+    s.set_defaults(fn=cmd_edit)
+
     s = sub.add_parser("show", help="print a chapter's extracted blocks: `show c004 --blocks 0-40`")
     s.add_argument("chapter")
     s.add_argument("--blocks", help="range, e.g. 0-40")
     s.add_argument("--translated", action="store_true", help="also print the translations")
+    s.add_argument("--full", action="store_true", help="print whole paragraphs, not previews")
     s.set_defaults(fn=cmd_show)
 
     s = sub.add_parser("doctor", help="check dependencies")

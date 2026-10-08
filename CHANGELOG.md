@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased (branch `voice`)
+
+- Voice mode for literary books: `voice study` (author research, style
+  profile, brief, people), the brief and the chunk's people in every task,
+  and `edit` (a voice-edit pass with drift warnings against the draft).
+- `show --full` prints whole paragraphs.
+
 ## 1.0.1 — 2026-10-08
 
 Changes for the Agensi security scan. Behaviour is the same.
