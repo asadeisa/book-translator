@@ -71,6 +71,9 @@ def profile(segs: list[dict]) -> dict:
     # paragraphs, motifs are not, so words found in over a third of them are skipped.
     spread = Counter(w for t in paras for w in {x.lower() for x in WORD_RE.findall(t)})
     common = {w for w, k in spread.items() if k > max(3, len(paras) / 3)}
+    common |= {w for stop in langs._STOP.values() for w in stop.split()}
+    common |= set("what than into over upon shall very would could should there their them "
+                  "then when where while been were said like into some such only also".split())
     vocab = Counter(w.lower() for w in WORD_RE.findall(text)
                     if len(w) >= 4 and w.lower() not in common)
 
