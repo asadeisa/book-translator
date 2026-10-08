@@ -35,7 +35,10 @@ directly. Reply as the task asks.
 
 Then read `voice/brief.md` yourself. It is copied into every task, so it must
 be short (300 words at most), concrete and correct. Fix anything vague
-("keep the beautiful style") or wrong before translating. Accept or correct
+("keep the beautiful style") or wrong before translating, and anything that asks
+for literal translation or the source word order: in a test on Gibran, a brief
+that said "translate every metaphor literally, in the same order" made the
+English stiff ("she it is who sang"). Keep the images, not the grammar. Accept or correct
 the motif glossary entries with `BT glossary`.
 
 ## 2. Translate

@@ -31,7 +31,10 @@ VOICE_RULE = """10. Keep the author's voice (see "Voice"). Keep sentence length 
    the source: do not split long sentences or merge short ones unless {tgt} grammar
    forces it. Keep repetitions, refrains and parallel structures. Keep every image and
    metaphor as an image; never explain or flatten it. Keep the register (archaic,
-   formal, plain, colloquial) the same throughout. Fluent is not the same as plain."""
+   formal, plain, colloquial) the same throughout. Fluent is not the same as plain.
+   Keep the images, not the grammar: write natural {tgt} syntax. A calque that copies
+   the source word order or constructions sounds translated, and that breaks the voice
+   as much as flattening does."""
 
 
 # ---------------------------------------------------------------------------
@@ -187,6 +190,8 @@ def study_task(meta: dict, src: dict, tgt: dict, pr: dict, passages: list[dict],
         f"5. Pitfalls: what a fluent but careless {tgt['name']} translation would destroy in",
         "   this book (flattened metaphors, broken-up long sentences, normalised repetition,",
         "   modernised register, explained allusions, wrong gender ...), each with an example.",
+        "   And the opposite failure: calques that make the translation sound translated",
+        "   (source word order, source constructions copied word for word, literal idioms).",
         f"6. Strategy: which {tgt['name']} register or literary tradition best echoes this voice,",
         "   and how to handle sentence length, repetition, imagery, wordplay, dialect, cultural",
         "   references and words with no equivalent.",
@@ -197,6 +202,8 @@ def study_task(meta: dict, src: dict, tgt: dict, pr: dict, passages: list[dict],
         "This text is copied into every translation task, so it must stand alone: the voice in",
         "3-5 bullets, then a short DO / DON'T list (repetition, sentence length, imagery,",
         "register, dialogue). No facts about the author unless they change a translation choice.",
+        "Never tell translators to translate literally or to keep the source word order: they",
+        "must keep the images and the rhythm, in natural " + tgt["name"] + " sentences.",
         "",
         f"## Step 5: write {voice_dir / 'people.md'}",
         "One line per person, starting with the name as written in the source:",
@@ -247,6 +254,9 @@ EDIT_RULES = """1. Meaning is fixed. Never add, drop or change information, name
    repetitions, refrains and parallel structures it normalised; bring sentence length
    and rhythm back toward the source; fix register slips (modern idiom in an old text,
    stiff formality in a plain one); make each character sound like the People notes.
+   Remove translationese too: source word order, calqued constructions and words chosen
+   only because they mirror the source. Read each edited segment as a {tgt} reader
+   would: it must sound written in {tgt}, not translated into it.
 3. Keep the markup (**bold**, *italic*, `code`, [text](url)), every verbatim token, and
    the glossary renderings exactly as in the draft.
 4. Leave a segment unchanged when it already works. Do not rewrite for the sake of it,
@@ -266,7 +276,7 @@ def edit_task(n: int, total: int, meta: dict, src: dict, tgt: dict, study: str, 
         f"checks. Make it read as if the author had written it in {tgt['name']}.",
         "",
         "## Editing rules",
-        EDIT_RULES,
+        EDIT_RULES.format(tgt=tgt["name"]),
         "",
         "## Voice brief",
         brief.strip() or "(no brief)",
