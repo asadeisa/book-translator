@@ -202,6 +202,23 @@ my-book-ar/
   output/             book files, assets, preview/
 ```
 
+## Security and permissions
+
+- **No network access.** The scripts make no network requests and need no API
+  keys; your own agent does the translation. The only URLs in the code are
+  XML namespace identifiers that the EPUB 3 and XHTML specs require inside the
+  output files (`NS_XHTML`, `NS_OPS`, `NS_OPF`, `NS_NCX`, `NS_DC` in
+  `scripts/render.py`). They are written as text and never fetched.
+- **No environment variables** are read.
+- **One external program:** for PDF output, `scripts/render.py` starts
+  Microsoft Edge or Google Chrome in headless mode (`subprocess.run` with an
+  argument list, no shell) to print a local HTML file. Pass `build --browser
+  PATH` to choose the executable.
+- **base64** is used in `scripts/extract.py` only to decode images that an
+  HTML or EPUB source embeds as `data:image/...;base64,` URIs, so they can be
+  saved to `source/assets/`.
+- **Files:** reads the book you name and writes only inside the project folder.
+
 More detail: `references/extraction.md` (inputs and fixing extraction),
 `references/output.md` (formats, fonts, RTL and CJK),
 `references/translator-prompt.md`, `references/review-rubric.md`.

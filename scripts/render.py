@@ -29,6 +29,14 @@ import langs  # noqa: E402
 # inline markup -> runs
 # ---------------------------------------------------------------------------
 
+# XML namespace identifiers required by the EPUB 3 / XHTML specs. They are
+# names written into the output files, never URLs that are fetched.
+NS_XHTML = "http://www.w3.org/1999/xhtml"
+NS_OPS = "http://www.idpf.org/2007/ops"
+NS_OPF = "http://www.idpf.org/2007/opf"
+NS_NCX = "http://www.daisy.org/z3986/2005/ncx/"
+NS_DC = "http://purl.org/dc/elements/1.1/"
+
 LINK_AT = re.compile(r"\[((?:\\.|[^\]\\])*)\]\(([^)\s]+)\)")
 
 
@@ -341,13 +349,14 @@ def book_html(tb: dict, src: dict, tgt: dict, page: str, pages: dict | None, mar
 # PDF via Chromium
 # ---------------------------------------------------------------------------
 
+BROWSER: str | None = None   # set from `build --browser PATH` / `doctor --browser PATH`
+
+
 def _browser_candidates() -> list[str]:
-    env = os.environ.get("BOOK_BROWSER")
-    c = [env] if env else []
+    c = [BROWSER] if BROWSER else []
     if sys.platform.startswith("win"):
-        for base in (os.environ.get("PROGRAMFILES(X86)", r"C:\Program Files (x86)"),
-                     os.environ.get("PROGRAMFILES", r"C:\Program Files"),
-                     os.environ.get("LOCALAPPDATA", "")):
+        for base in (r"C:\Program Files (x86)", r"C:\Program Files",
+                     str(Path.home() / "AppData" / "Local")):
             c += [os.path.join(base, r"Microsoft\Edge\Application\msedge.exe"),
                   os.path.join(base, r"Google\Chrome\Application\chrome.exe"),
                   os.path.join(base, r"Chromium\Application\chrome.exe")]
@@ -402,8 +411,8 @@ def html_to_pdf(html_path: Path, pdf_path: Path, page: str) -> str:
         if pdf_path.exists() and pdf_path.stat().st_size > 0:
             return f"cli:{Path(exe).name}"
     raise SystemExit("no Chromium browser found for PDF output. Install Microsoft Edge or Google Chrome, "
-                     "or `pip install playwright && playwright install chromium`, or set BOOK_BROWSER to "
-                     "a Chrome/Edge executable. HTML/EPUB/DOCX/MD outputs do not need it.")
+                     "or `pip install playwright && playwright install chromium`, or pass --browser with the path "
+                     "to a Chrome/Edge executable. HTML/EPUB/DOCX/MD outputs do not need it.")
 
 
 def _find_pages(pdf_path: Path) -> dict:
@@ -490,7 +499,7 @@ def build_epub(out_dir: Path, stem: str, tb: dict, src: dict, tgt: dict, assets_
     css = (CSS % {"fonts": tgt["fonts"], "mono": langs.MONO_STACK, "page": "auto"}).replace("@page { size: auto; }", "")
     lang, d = tgt["code"], tgt["dir"]
     xhead = ('<?xml version="1.0" encoding="utf-8"?>\n<!DOCTYPE html>\n'
-             f'<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" '
+             f'<html xmlns="{NS_XHTML}" xmlns:epub="{NS_OPS}" '
              f'lang="{lang}" xml:lang="{lang}" dir="{d}">\n')
     files, spine, nav_items = {}, [], []
     title_x = html.escape(plain(tb["title"]))
@@ -515,7 +524,8 @@ def build_epub(out_dir: Path, stem: str, tb: dict, src: dict, tgt: dict, assets_
            + "".join(f'<li><a href="{f}">{html.escape(t)}</a></li>' for f, t in nav_items)
            + "</ol></nav></body></html>")
     files["OEBPS/nav.xhtml"] = nav
-    ncx = ('<?xml version="1.0" encoding="utf-8"?>\n<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">'
+    ncx = ('<?xml version="1.0" encoding="utf-8"?>\n'
+           f'<ncx xmlns="{NS_NCX}" version="2005-1">'
            f'<head><meta name="dtb:uid" content="{uid}"/></head><docTitle><text>{title_x}</text></docTitle><navMap>'
            + "".join(f'<navPoint id="n{i}" playOrder="{i}"><navLabel><text>{html.escape(t)}</text></navLabel>'
                      f'<content src="{f}"/></navPoint>' for i, (f, t) in enumerate(nav_items, 1))
@@ -534,8 +544,8 @@ def build_epub(out_dir: Path, stem: str, tb: dict, src: dict, tgt: dict, assets_
         manifest.append(f'<item id="img{k}" href="{f}" media-type="{MEDIA.get(ext, "image/png")}"/>')
     import time as _t
     opf = ('<?xml version="1.0" encoding="utf-8"?>\n'
-           '<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="bookid" '
-           f'xml:lang="{lang}" dir="{d}">\n<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">'
+           f'<package xmlns="{NS_OPF}" version="3.0" unique-identifier="bookid" '
+           f'xml:lang="{lang}" dir="{d}">\n<metadata xmlns:dc="{NS_DC}">'
            f'<dc:identifier id="bookid">{uid}</dc:identifier><dc:title>{title_x}</dc:title>'
            f'<dc:language>{lang}</dc:language>'
            + (f"<dc:creator>{html.escape(tb['author'])}</dc:creator>" if tb["author"] else "")
@@ -921,7 +931,7 @@ def build_docx(out_dir: Path, stem: str, tb: dict, tgt: dict, assets_dir: Path) 
         r = OxmlElement("w:r")
         if kind == "instr":
             it = OxmlElement("w:instrText")
-            it.set("{http://www.w3.org/XML/1998/namespace}space", "preserve")
+            it.set(qn("xml:space"), "preserve")
             it.text = val
             r.append(it)
         elif kind == "text":

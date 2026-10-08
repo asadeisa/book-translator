@@ -22,7 +22,7 @@ of every chapter and section through named destinations, and the second print
 fills the TOC page numbers. PyMuPDF then adds bookmarks and metadata.
 
 Page size: `BT build --page-size Letter` or `BT set page_size=A5`.
-Browser: set `BOOK_BROWSER=/path/to/chrome` if it is not found automatically.
+Browser: pass `build --browser /path/to/chrome` if it is not found automatically.
 
 ## Right-to-left languages (ar, he, fa, ur, ps, ku, ug, yi, dv)
 

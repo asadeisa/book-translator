@@ -9,7 +9,7 @@
     python book.py build --formats pdf,epub,docx     # assemble the translated book
 
 Run any command with -h for options. All commands take --project DIR
-(default: the current directory, or $BOOK_PROJECT).
+(default: the current directory).
 """
 from __future__ import annotations
 
@@ -29,7 +29,10 @@ import langs  # noqa: E402
 
 SCRIPTS_DIR = Path(__file__).resolve().parent
 TRANSLATABLE = ("heading", "para", "item", "quote", "caption")
-URL_RE = re.compile(r"(?:https?|ftp)://[^\s<>\"')\]]+[^\s<>\"')\].,;:!?]|mailto:[^\s)\]]+|[\w.+-]+@[\w-]+\.[\w.-]+\w")
+_WEB_LINK = r"(?:https?|ftp)://[^\s<>\"')\]]+[^\s<>\"')\].,;:!?]"
+_MAILTO = r"mailto:[^\s)\]]+"
+_EMAIL = r"[\w.+-]+@[\w-]+\.[\w.-]+\w"
+URL_RE = re.compile("|".join((_WEB_LINK, _MAILTO, _EMAIL)))
 CODE_SPAN_RE = re.compile(r"`([^`\n]+)`")
 LINK_TARGET_RE = re.compile(r"\]\(([^)\s]+)\)")
 NUM_RE = re.compile(r"\d+(?:[.,:]\d+)*")
@@ -1100,7 +1103,7 @@ def cmd_doctor(a):
             ok = ok and not need
     import render
     br = render._browser_candidates()
-    print(f"  {'ok' if br else 'MISSING':8s} browser    PDF output: {br[0] if br else 'install Edge/Chrome or set BOOK_BROWSER'}")
+    print(f"  {'ok' if br else 'MISSING':8s} browser    PDF output: {br[0] if br else 'install Edge/Chrome or pass --browser PATH'}")
     sys.exit(0 if ok else 1)
 
 
@@ -1171,7 +1174,7 @@ def main(argv=None):
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     common = argparse.ArgumentParser(add_help=False)
     common.add_argument("--project", "-p", dest="project_dir", default=None,
-                        help="project directory (default: current directory or $BOOK_PROJECT)")
+                        help="project directory (default: current directory)")
     sub = ap.add_subparsers(dest="cmd", required=True)
     _add = sub.add_parser
 
@@ -1238,6 +1241,7 @@ def main(argv=None):
     s.set_defaults(fn=cmd_show)
 
     s = sub.add_parser("doctor", help="check dependencies")
+    s.add_argument("--browser", help="path to Chrome/Edge if it is not found automatically")
     s.set_defaults(fn=cmd_doctor)
 
     s = sub.add_parser("build", help="assemble the translated book")
@@ -1245,6 +1249,7 @@ def main(argv=None):
     s.add_argument("--page-size", help="A4, Letter, A5 ...")
     s.add_argument("--allow-missing", action="store_true", help="draft build with source text for gaps")
     s.add_argument("--force", action="store_true", help="build even if checks fail")
+    s.add_argument("--browser", help="path to Chrome/Edge for PDF output if it is not found automatically")
     s.set_defaults(fn=cmd_build)
 
     s = sub.add_parser("preview", help="render PDF pages to PNG for a visual check")
@@ -1258,8 +1263,11 @@ def main(argv=None):
         sys.stdout.reconfigure(encoding="utf-8")
     except Exception:
         pass
+    if getattr(a, "browser", None):
+        import render
+        render.BROWSER = a.browser
     if a.cmd not in ("init", "doctor"):
-        a.project_dir = Path(a.project_dir or os.environ.get("BOOK_PROJECT") or ".")
+        a.project_dir = Path(a.project_dir or ".")
     a.fn(a)
 
 

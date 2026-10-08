@@ -73,8 +73,8 @@ pip install pymupdf python-docx pillow
 python scripts/book.py doctor
 ```
 
-PDF output needs Microsoft Edge or Google Chrome (found automatically, or set
-`BOOK_BROWSER`). `pip install playwright` is optional and adds page-number
+PDF output needs Microsoft Edge or Google Chrome (found automatically, or pass
+`build --browser PATH`). `pip install playwright` is optional and adds page-number
 footers. HTML, EPUB, DOCX and Markdown need no browser.
 
 Then ask your agent: *"Translate book.pdf into Spanish, PDF and EPUB."* It
