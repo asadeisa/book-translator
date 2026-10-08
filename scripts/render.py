@@ -24,18 +24,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import langs  # noqa: E402
+from uris import NS_DC, NS_NCX, NS_OPF, NS_OPS, NS_XHTML  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # inline markup -> runs
 # ---------------------------------------------------------------------------
-
-# XML namespace identifiers required by the EPUB 3 / XHTML specs. They are
-# names written into the output files, never URLs that are fetched.
-NS_XHTML = "http://www.w3.org/1999/xhtml"
-NS_OPS = "http://www.idpf.org/2007/ops"
-NS_OPF = "http://www.idpf.org/2007/opf"
-NS_NCX = "http://www.daisy.org/z3986/2005/ncx/"
-NS_DC = "http://purl.org/dc/elements/1.1/"
 
 LINK_AT = re.compile(r"\[((?:\\.|[^\]\\])*)\]\(([^)\s]+)\)")
 

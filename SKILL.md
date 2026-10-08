@@ -207,8 +207,8 @@ my-book-ar/
 - **No network access.** The scripts make no network requests and need no API
   keys; your own agent does the translation. The only URLs in the code are
   XML namespace identifiers that the EPUB 3 and XHTML specs require inside the
-  output files (`NS_XHTML`, `NS_OPS`, `NS_OPF`, `NS_NCX`, `NS_DC` in
-  `scripts/render.py`). They are written as text and never fetched.
+  output files, plus the pattern that finds links in the book's text. All of
+  them are in `scripts/uris.py`. They are written as text and never fetched.
 - **No environment variables** are read.
 - **One external program:** for PDF output, `scripts/render.py` starts
   Microsoft Edge or Google Chrome in headless mode (`subprocess.run` with an

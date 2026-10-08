@@ -7,9 +7,9 @@ Changes for the Agensi security scan. Behaviour is the same.
 - No environment variables are read. `BOOK_BROWSER` is replaced by
   `build --browser PATH` (and `doctor --browser PATH`); `BOOK_PROJECT` is
   removed, so use `--project`.
-- XML namespace identifiers in the EPUB writer are named constants, and the
-  DOCX writer uses `qn("xml:space")`.
-- The link and e-mail pattern in `book.py` is split into named parts.
+- The fixed URI strings (the link pattern and the EPUB/XHTML namespace
+  identifiers) moved to `scripts/uris.py`. The DOCX writer uses
+  `qn("xml:space")`.
 - SKILL.md has a "Security and permissions" section.
 
 ## 1.0.0 — 2026-10-08

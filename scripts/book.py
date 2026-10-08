@@ -26,13 +26,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import langs  # noqa: E402
+from uris import WEB_LINK  # noqa: E402
 
 SCRIPTS_DIR = Path(__file__).resolve().parent
 TRANSLATABLE = ("heading", "para", "item", "quote", "caption")
-_WEB_LINK = r"(?:https?|ftp)://[^\s<>\"')\]]+[^\s<>\"')\].,;:!?]"
 _MAILTO = r"mailto:[^\s)\]]+"
 _EMAIL = r"[\w.+-]+@[\w-]+\.[\w.-]+\w"
-URL_RE = re.compile("|".join((_WEB_LINK, _MAILTO, _EMAIL)))
+URL_RE = re.compile("|".join((WEB_LINK, _MAILTO, _EMAIL)))
 CODE_SPAN_RE = re.compile(r"`([^`\n]+)`")
 LINK_TARGET_RE = re.compile(r"\]\(([^)\s]+)\)")
 NUM_RE = re.compile(r"\d+(?:[.,:]\d+)*")
