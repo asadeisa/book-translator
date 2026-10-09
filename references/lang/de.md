@@ -1,0 +1,11 @@
+Write German syntax and German typography, not English in German words:
+- Quotation marks: „…“ (or »…« if the book uses them), never English "…". Inner quotes: ‚…‘.
+- Narration uses the Präteritum («sagte», «flog», «weinte»); keep the Perfekt for spoken dialogue.
+- Decide du/Sie for each pair of speakers once (People notes) and never switch.
+- English "-ing" chains are not German: "as he ran past him" → «als sie an ihm vorbeilief» / «im Vorbeilaufen»; "fluttering after a sunbeam" → «die einem Sonnenstrahl nachflatterte».
+- Hypothetical "would" is Konjunktiv II («Sie würde sich nie opfern», «wäre»), not Futur.
+- Keep German grammatical gender and follow it in pronouns: die Nachtigall → sie, die Eiche → sie, der Baum → er. If the source's "he/she" matters to the story, choose the German noun that carries it (der Eichbaum) rather than mixing genders.
+- No false friends: eventually ≠ eventuell, actually ≠ aktuell, sensible ≠ sensibel, become ≠ bekommen.
+- Prefer verbs to noun stacks («nachdem er gelesen hatte», not «nach dem Lesen seinerseits»); keep compounds where German has them («Herzblut», «Sonnenuhr»).
+- Comma before every subordinate clause and before «aber/sondern»; no comma between subject and verb.
+- Literary register: no modern colloquialisms («okay», «total», «krass»), no Anglicisms where a German word exists.

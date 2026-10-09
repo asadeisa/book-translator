@@ -979,7 +979,7 @@ def check_chunk(p: Project, n: int, segs: dict, baseline: float, chunk_of: dict)
                 warns.append(f"{i}: {msg}")
         # glossary
         for k, v in glossary_for(s, g):
-            if v.lower() not in t.lower():
+            if not langs.term_in(v, t, tgt["code"]):
                 hint = " (fine if the word is used in another sense here)" if k.rstrip().endswith(")") else ""
                 warns.append(f"{i}: glossary term '{k}' not rendered as '{v}'{hint}")
     # glossary proposals

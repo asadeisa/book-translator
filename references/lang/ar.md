@@ -11,3 +11,4 @@ Write Arabic syntax, not English syntax in Arabic words:
 - English fillers are not Arabic: "in fact" → «بل» more often than «في الواقع»; "upon my word" → «والله» or «حقًّا»; "I am afraid that" (a hedge) → «أخشى أن» / «يؤسفني أن».
 - English "would/could" for something hypothetical is not a future: "She would not sacrifice herself" → «ما كانت لتضحّي بنفسها» / «لم تكن لتضحّي», not «لن تضحّي».
 - Do not coin words to mirror English («يقرمز»، «لهبيّة اللون»): use a phrase that exists («يجعله قرمزيًّا»، «بلون اللهب»).
+- Prefer the established Arabic word to a transliteration: «القيثارة» not «الهارب», «زهرة الياقوتية» not «الهياسنت». Transliterate only names and things Arabic has no word for.

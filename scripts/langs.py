@@ -173,7 +173,37 @@ LINT = {
         (r"(?<!\w)يا\s+[^\s\W\d_]+\s+ال[^\s\W\d_]+",
          "vocative + definite adjective (\"يا عندليب الصغير\")? fine for an idafa (\"يا رفاق الصبا\")"),
     ],
+    "de": [
+        (r'"', 'English quotation mark: use „…“ (or »…«)'),
+    ],
+    "zh": [
+        (r'[\u4e00-\u9fff][,.!?;:](?!\d)', "half-width punctuation after Chinese text: use ，。！？；："),
+        (r'"', "half-width quotation mark: use “…”"),
+        (r"的[^，。！？；：、]{0,6}的[^，。！？；：、]{0,6}的", "three 的 in a row: break the attributive chain"),
+    ],
 }
+
+_AR_PREFIX = "(?:[وف]?[بكل]?(?:ال)?|[وف]?لل)"
+
+
+def term_in(term: str, text: str, code: str) -> bool:
+    """Is a glossary rendering present, allowing the target's inflection?
+    Arabic attaches و ف ب ك ل and ال in front and pronouns behind («الحب» in «بحبّي»)."""
+    if term.lower() in text.lower():
+        return True
+    if norm(code) != "ar":
+        return False
+    strip = lambda s: re.sub("[\u064b-\u0652\u0640]", "", s)     # harakat, tatweel
+    t = strip(text)
+    for w in strip(term).split():
+        core = re.sub("^ال", "", w)
+        if core.endswith("ة"):
+            core = core[:-1] + "[ةت]"
+        else:
+            core = re.escape(core)
+        if not re.search(rf"(?<!\w){_AR_PREFIX}{core}[^\s\W\d_]{{0,3}}(?!\w)", t):
+            return False
+    return True
 
 
 def lint(code: str, text: str) -> list[str]:

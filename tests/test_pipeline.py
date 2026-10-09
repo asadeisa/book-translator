@@ -308,6 +308,10 @@ def test_arabic_lint_and_grammar_notes():
     assert langs.lint("ar", "«اقترب، يا العندليب»")
     assert not langs.lint("ar", "«قالت إنها سترقص»، قال العندليب. «يا الله!»")
     assert "verbal sentence" in book.lang_notes("ar") and book.lang_notes("xx") == ""
+    assert langs.term_in("الحب", "فبحبّي", "ar") and langs.term_in("الحبيبة", "حبيبتي", "ar")
+    assert not langs.term_in("الحب", "الكره", "ar") and not langs.term_in("Liebe", "Hass", "de")
+    assert langs.lint("de", 'Sie sagte: "Nein."') and not langs.lint("de", "Sie sagte: „Nein.“")
+    assert langs.lint("zh", "她说,不.") and not langs.lint("zh", "她说：“不。”")
 
 
 def test_voice_profile_and_people():
