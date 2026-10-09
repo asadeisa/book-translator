@@ -175,6 +175,7 @@ LINT = {
     ],
     "de": [
         (r'"', 'English quotation mark: use „…“ (or »…«)'),
+        (r"[?!]“\s+(?=[a-zäöüß])", "missing comma after the closing quote: „…?“, fragte er"),
     ],
     "zh": [
         (r'[\u4e00-\u9fff][,.!?;:](?!\d)', "half-width punctuation after Chinese text: use ，。！？；："),
@@ -192,7 +193,11 @@ def term_in(term: str, text: str, code: str) -> bool:
     if term.lower() in text.lower():
         return True
     if norm(code) != "ar":
-        return False
+        # inflecting languages: "tanzen" is there as "tanzt", "wahrer" as "wahre"
+        low = text.lower()
+        words = [w for w in re.findall(r"[^\W\d_]+", term.lower()) if len(w) >= 4]
+        return bool(words) and all(
+            re.search(rf"(?<!\w){re.escape(w[:max(4, len(w) - 3)])}", low) for w in words)
     strip = lambda s: re.sub("[\u064b-\u0652\u0640]", "", s)     # harakat, tatweel
     t = strip(text)
     for w in strip(term).split():

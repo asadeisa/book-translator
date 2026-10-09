@@ -293,6 +293,12 @@ def blocks_html(blocks: list[dict], src_lang: str, mark_sections: bool, rtl_doc:
     return "\n".join(out)
 
 
+def wants_toc(tb: dict) -> bool:
+    """A contents page only helps when there are at least two titled chapters
+    (a short story or a single essay would get an empty page)."""
+    return sum(1 for ch in tb["chapters"] if ch["title"]) >= 2
+
+
 def book_html(tb: dict, src: dict, tgt: dict, page: str, pages: dict | None, markers: bool) -> str:
     css = CSS % {"fonts": tgt["fonts"], "mono": langs.MONO_STACK, "page": page}
     parts = [f'<!DOCTYPE html>\n<html lang="{tgt["code"]}" dir="{tgt["dir"]}">\n<head>\n<meta charset="utf-8">',
@@ -308,15 +314,16 @@ def book_html(tb: dict, src: dict, tgt: dict, page: str, pages: dict | None, mar
         cover.append(f'<div class="translator" dir="auto">{html.escape(tb["translator"])}</div>')
     cover.append("</section>")
     parts += cover
-    toc = [f'<nav class="toc"><h2>{inline_html(tb["toc"])}</h2><ol>']
-    for ch in tb["chapters"]:
-        if not ch["title"]:
-            continue
-        pg = (pages or {}).get(ch["id"], "")
-        toc.append(f'<li><a href="#{ch["id"]}">{inline_html(ch["title"])}</a>'
-                   f'<span class="pg">{pg if pages is not None else "000"}</span></li>')
-    toc.append("</ol></nav>")
-    parts += toc
+    if wants_toc(tb):
+        toc = [f'<nav class="toc"><h2>{inline_html(tb["toc"])}</h2><ol>']
+        for ch in tb["chapters"]:
+            if not ch["title"]:
+                continue
+            pg = (pages or {}).get(ch["id"], "")
+            toc.append(f'<li><a href="#{ch["id"]}">{inline_html(ch["title"])}</a>'
+                       f'<span class="pg">{pg if pages is not None else "000"}</span></li>')
+        toc.append("</ol></nav>")
+        parts += toc
     for ch in tb["chapters"]:
         title = inline_html(ch["title"])
         if markers and "<a " not in title:
@@ -510,8 +517,8 @@ def build_epub(out_dir: Path, stem: str, tb: dict, src: dict, tgt: dict, assets_
         files[f"OEBPS/{name}"] = (xhead + f"<head><title>{ttl}</title><link rel=\"stylesheet\" href=\"style.css\"/></head>"
                                   f"<body>{_xhtml(head + body)}</body></html>")
         spine.append(name[:-6])
-        if ch["title"]:
-            nav_items.append((name, plain(ch["title"])))
+        if ch["title"] or not nav_items:     # EPUB needs at least one nav entry
+            nav_items.append((name, plain(ch["title"]) or plain(tb["title"])))
     nav = (xhead + f"<head><title>{html.escape(plain(tb['toc']))}</title></head><body>"
            f"<nav epub:type=\"toc\" id=\"toc\"><h1>{html.escape(plain(tb['toc']))}</h1><ol>"
            + "".join(f'<li><a href="{f}">{html.escape(t)}</a></li>' for f, t in nav_items)
@@ -914,13 +921,16 @@ def build_docx(out_dir: Path, stem: str, tb: dict, tgt: dict, assets_dir: Path) 
         para_dir(p, "center")
         add_text(p, tb["author"], size=13)
     # TOC field (Word fills it when the document is opened)
-    p = doc.add_paragraph()      # not a Heading style, so it is not listed in its own TOC
-    para_dir(p)
-    sub(p._p.get_or_add_pPr(), "w:pageBreakBefore")
-    add_text(p, tb["toc"], bold=True, size=18, color=RGBColor(0x0B, 0x3D, 0x66))
-    p = doc.add_paragraph()
-    para_dir(p)
-    for kind, val in (("begin", None), ("instr", ' TOC \\o "1-2" \\h \\z \\u '), ("separate", None), ("text", "..."), ("end", None)):
+    toc_field = (("begin", None), ("instr", ' TOC \\o "1-2" \\h \\z \\u '), ("separate", None),
+                 ("text", "..."), ("end", None)) if wants_toc(tb) else ()
+    if toc_field:
+        p = doc.add_paragraph()      # not a Heading style, so it is not listed in its own TOC
+        para_dir(p)
+        sub(p._p.get_or_add_pPr(), "w:pageBreakBefore")
+        add_text(p, tb["toc"], bold=True, size=18, color=RGBColor(0x0B, 0x3D, 0x66))
+        p = doc.add_paragraph()
+        para_dir(p)
+    for kind, val in toc_field:
         r = OxmlElement("w:r")
         if kind == "instr":
             it = OxmlElement("w:instrText")

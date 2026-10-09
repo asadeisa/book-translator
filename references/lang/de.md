@@ -9,3 +9,4 @@ Write German syntax and German typography, not English in German words:
 - Prefer verbs to noun stacks («nachdem er gelesen hatte», not «nach dem Lesen seinerseits»); keep compounds where German has them («Herzblut», «Sonnenuhr»).
 - Comma before every subordinate clause and before «aber/sondern»; no comma between subject and verb.
 - Literary register: no modern colloquialisms («okay», «total», «krass»), no Anglicisms where a German word exists.
+- A comma always follows the closing quote when the reporting clause comes after it, even after ? or !: „Warum weint er?“, fragte die Eidechse.

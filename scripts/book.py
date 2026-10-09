@@ -667,7 +667,9 @@ RULES = """1. Translate EVERY segment completely and faithfully: every sentence,
    register described under "Style". Follow {tgt} grammar, not the source's: word
    order, agreement, and pronouns only where {tgt} needs them. Proper names: keep or transliterate consistently.
 6. Never correct facts, claims or examples - translate them as written, even if wrong.
-   Obvious typos and stray spaces in the source may simply be normalised.{notes_rule}
+   Obvious typos and stray spaces in the source may simply be normalised. A first word in
+   CAPITALS at the start of a chapter or story is usually a printing convention (small
+   caps), not emphasis: translate it as a normal word.{notes_rule}
 7. Code blocks are shown only as context; they are copied into the book unchanged.
 8. Use "=" (keep the source) only for segments with nothing to translate: names, numbers,
    dates, versions, commands, or literal program output / column headers that the reader
